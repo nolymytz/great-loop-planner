@@ -1,5 +1,4 @@
-import { useAuth } from "@/_core/hooks/useAuth";
-import { startLogin } from "@/const";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Anchor,
   BarChart3,
@@ -80,12 +79,9 @@ export default function Home() {
                 </div>
               </Link>
             ) : (
-              <button
-                onClick={() => startLogin()}
-                className="btn-primary text-[10px] py-1.5 px-4"
-              >
-                Sign In
-              </button>
+              <Link href="/auth">
+                <button className="btn-primary text-[10px] py-1.5 px-4">Sign In</button>
+              </Link>
             )}
           </div>
         </div>
@@ -175,13 +171,12 @@ export default function Home() {
                       </button>
                     </Link>
                   ) : (
-                    <button
-                      onClick={() => startLogin()}
-                      className="btn-primary"
-                    >
-                      Start Planning
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
+                    <Link href="/auth">
+                      <button className="btn-primary">
+                        Start Planning
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </Link>
                   )}
                   <button className="btn-ghost">View Charts</button>
                 </div>
@@ -526,12 +521,9 @@ export default function Home() {
                   </button>
                 </Link>
               ) : (
-                <button
-                  onClick={() => startLogin()}
-                  className="btn-primary px-8 py-3 text-[11px]"
-                >
-                  Create Expedition
-                </button>
+                <Link href="/auth">
+                  <button className="btn-primary px-8 py-3 text-[11px]">Create Expedition</button>
+                </Link>
               )}
               <button className="btn-ghost px-8 py-3 text-[11px]">
                 View Pricing

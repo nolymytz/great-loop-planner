@@ -1,383 +1,158 @@
-import { useAuth } from "@/_core/hooks/useAuth";
-import { startLogin } from "@/const";
-import { trpc } from "@/lib/trpc";
-import { AppNav } from "@/components/AppNav";
-import {
-  Anchor,
-  BarChart3,
-  Fuel,
-  Gauge,
-  Layers,
-  Ruler,
-  Settings,
-  Ship,
-  User,
-  Users,
-  Wrench,
-} from "lucide-react";
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import AppLayout from '@/components/AppLayout';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase, type VesselProfile } from '@/lib/supabase';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Anchor, Ship, Save, Ruler, Gauge, Wind } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 
-function TechInput({
-  label,
-  value,
-  onChange,
-  unit,
-  placeholder,
-  type = "number",
-}: {
-  label: string;
-  value: string | number | null | undefined;
-  onChange: (v: string | number | null) => void;
-  unit?: string;
-  placeholder?: string;
-  type?: string;
-}) {
-  return (
-    <div className="bg-[#f9f9f9] border border-[#e2e2e2] rounded px-4 py-3">
-      <label
-        className="block text-[9px] text-[#42474d] uppercase tracking-widest mb-2"
-        style={{ fontFamily: "'JetBrains Mono', monospace" }}
-      >
-        {label}
-      </label>
-      <div className="flex items-center gap-2">
-        <input
-          type={type}
-          step={type === "number" ? "0.1" : undefined}
-          placeholder={placeholder ?? "—"}
-          value={value ?? ""}
-          onChange={(e) =>
-            onChange(
-              type === "number"
-                ? e.target.value === ""
-                  ? null
-                  : parseFloat(e.target.value)
-                : e.target.value
-            )
-          }
-          className="flex-1 bg-transparent border-none outline-none text-[15px] font-semibold text-[#002b49] placeholder:text-[#c0c4c8]"
-          style={{ fontFamily: "'JetBrains Mono', monospace" }}
-        />
-        {unit && (
-          <span
-            className="text-[10px] text-[#42474d] shrink-0"
-            style={{ fontFamily: "'JetBrains Mono', monospace" }}
-          >
-            {unit}
-          </span>
-        )}
-      </div>
-    </div>
-  );
-}
+type FormState = {
+  boat_name: string; boat_type: string; length_overall: string; beam: string;
+  draft: string; air_draft: string; cruising_speed: string; fuel_capacity: string;
+  fuel_consumption: string; fuel_range: string; engine_type: string;
+  hull_material: string; year_built: string; notes: string;
+};
+const EMPTY: FormState = {
+  boat_name:'',boat_type:'',length_overall:'',beam:'',draft:'',air_draft:'',
+  cruising_speed:'',fuel_capacity:'',fuel_consumption:'',fuel_range:'',
+  engine_type:'',hull_material:'',year_built:'',notes:'',
+};
 
 export default function SettingsPage() {
-  const { isAuthenticated, user, loading } = useAuth();
-  const { data: vessel } = trpc.vessel.get.useQuery(undefined, {
-    enabled: isAuthenticated,
-  });
-  const upsert = trpc.vessel.upsert.useMutation({
-    onSuccess: () => toast.success("Vessel profile saved"),
-  });
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const [form, setForm] = useState<FormState>(EMPTY);
 
-  const [form, setForm] = useState({
-    boatName: "",
-    boatType: "",
-    draft: null as number | null,
-    airDraft: null as number | null,
-    cruisingSpeed: null as number | null,
-    fuelRange: null as number | null,
-    lengthOverall: null as number | null,
-    beam: null as number | null,
+  const { data: vessel, isLoading } = useQuery({
+    queryKey: ['vessel', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from('vessel_profiles').select('*').eq('user_id', user!.id).maybeSingle();
+      return data as VesselProfile | null;
+    },
+    enabled: !!user,
   });
 
   useEffect(() => {
-    if (vessel) {
-      setForm({
-        boatName: vessel.boatName ?? "",
-        boatType: vessel.boatType ?? "",
-        draft: vessel.draft ?? null,
-        airDraft: vessel.airDraft ?? null,
-        cruisingSpeed: vessel.cruisingSpeed ?? null,
-        fuelRange: vessel.fuelRange ?? null,
-        lengthOverall: vessel.lengthOverall ?? null,
-        beam: vessel.beam ?? null,
-      });
-    }
+    if (vessel) setForm({
+      boat_name: vessel.boat_name ?? '', boat_type: vessel.boat_type ?? '',
+      length_overall: vessel.length_overall?.toString() ?? '', beam: vessel.beam?.toString() ?? '',
+      draft: vessel.draft?.toString() ?? '', air_draft: vessel.air_draft?.toString() ?? '',
+      cruising_speed: vessel.cruising_speed?.toString() ?? '', fuel_capacity: vessel.fuel_capacity?.toString() ?? '',
+      fuel_consumption: vessel.fuel_consumption?.toString() ?? '', fuel_range: vessel.fuel_range?.toString() ?? '',
+      engine_type: vessel.engine_type ?? '', hull_material: vessel.hull_material ?? '',
+      year_built: vessel.year_built?.toString() ?? '', notes: vessel.notes ?? '',
+    });
   }, [vessel]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center">
-        <Anchor className="w-8 h-8 text-[#002b49] animate-pulse" />
-      </div>
-    );
-  }
+  const save = useMutation({
+    mutationFn: async () => {
+      const p = {
+        user_id: user!.id,
+        boat_name: form.boat_name || null, boat_type: form.boat_type || null,
+        length_overall: form.length_overall ? parseFloat(form.length_overall) : null,
+        beam: form.beam ? parseFloat(form.beam) : null,
+        draft: form.draft ? parseFloat(form.draft) : null,
+        air_draft: form.air_draft ? parseFloat(form.air_draft) : null,
+        cruising_speed: form.cruising_speed ? parseFloat(form.cruising_speed) : null,
+        fuel_capacity: form.fuel_capacity ? parseFloat(form.fuel_capacity) : null,
+        fuel_consumption: form.fuel_consumption ? parseFloat(form.fuel_consumption) : null,
+        fuel_range: form.fuel_range ? parseFloat(form.fuel_range) : null,
+        engine_type: form.engine_type || null, hull_material: form.hull_material || null,
+        year_built: form.year_built ? parseInt(form.year_built) : null,
+        notes: form.notes || null,
+      };
+      const { error } = await supabase.from('vessel_profiles').upsert(p, { onConflict: 'user_id' });
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['vessel'] }); toast.success('Vessel profile saved'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#f9f9f9]">
-        <AppNav />
-        <div className="flex-1 flex items-center justify-center pt-14 min-h-screen">
-          <div className="text-center max-w-sm px-4">
-            <div className="w-16 h-16 rounded-full bg-[#002b49] flex items-center justify-center mx-auto mb-6">
-              <Anchor className="w-7 h-7 text-white" />
-            </div>
-            <h2
-              className="text-[28px] font-bold text-[#002b49] mb-3"
-              style={{ fontFamily: "'Playfair Display', serif" }}
-            >
-              Sign in to manage settings
-            </h2>
-            <button onClick={() => startLogin()} className="btn-primary px-8">
-              Sign In
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const set = (k: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setForm(f => ({ ...f, [k]: e.target.value }));
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9]">
-      <AppNav />
-
-      <div className="flex pt-14 min-h-screen">
-        {/* ── LEFT SIDEBAR ── */}
-        <aside className="hidden lg:flex flex-col w-56 shrink-0 border-r border-[#e2e2e2] bg-white sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
-          <div className="px-4 py-5 border-b border-[#e2e2e2]">
-            <div className="flex items-center gap-2 mb-1">
-              <Ship className="w-3.5 h-3.5 text-[#42474d]" />
-              <span
-                className="text-[11px] font-medium text-[#002b49] truncate"
-                style={{ fontFamily: "'JetBrains Mono', monospace" }}
-              >
-                {form.boatName || user?.name || "My Vessel"}
-              </span>
-            </div>
-            <p
-              className="text-[10px] text-[#42474d] pl-5"
-              style={{ fontFamily: "'JetBrains Mono', monospace" }}
-            >
-              {form.boatType || "Great Loop Expedition"}
-            </p>
-          </div>
-
-          <nav className="flex-1 px-3 py-4 space-y-0.5">
-            {[
-              { icon: BarChart3, label: "Dashboard" },
-              { icon: Layers, label: "Route Map" },
-              { icon: Fuel, label: "Fuel Calculator" },
-              { icon: Wrench, label: "Maintenance" },
-              { icon: Users, label: "Community" },
-            ].map(({ icon: Icon, label }) => (
-              <button
-                key={label}
-                className="sidebar-item w-full text-left"
-                onClick={() => toast.info("Feature coming soon")}
-              >
-                <Icon className="w-3.5 h-3.5 shrink-0" />
-                {label}
-              </button>
-            ))}
-          </nav>
-
-          <div className="px-3 pb-4">
-            <button className="w-full py-2.5 px-3 bg-[#002b49] text-white rounded text-[10px] font-mono tracking-widest uppercase hover:bg-[#001629] transition-colors">
-              Upgrade to Pro
-            </button>
-          </div>
-        </aside>
-
-        {/* ── MAIN CONTENT ── */}
-        <main className="flex-1 overflow-x-hidden">
-          {/* Page header */}
-          <div className="bg-white border-b border-[#e2e2e2] px-8 lg:px-10 py-6">
-            <div className="max-w-[800px] mx-auto">
-              <p
-                className="text-[10px] text-[#42474d] uppercase tracking-widest mb-1"
-                style={{ fontFamily: "'JetBrains Mono', monospace" }}
-              >
-                Configuration
-              </p>
-              <h1
-                className="text-[28px] font-bold text-[#002b49]"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                Vessel Profile
-              </h1>
-            </div>
-          </div>
-
-          <div className="px-8 lg:px-10 py-8">
-            <div className="max-w-[800px] mx-auto space-y-6">
-
-              {/* Account card */}
-              <div className="card-maritime p-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <User className="w-4 h-4 text-[#002b49]" />
-                  <h2
-                    className="text-[13px] font-semibold text-[#002b49] uppercase tracking-widest"
-                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                  >
-                    Account
-                  </h2>
+    <AppLayout>
+      <div className="p-6 lg:p-8 max-w-3xl mx-auto">
+        <div className="mb-8">
+          <p className="text-xs text-[#6b7280] uppercase tracking-widest mb-1 font-mono">Configuration</p>
+          <h1 className="font-serif text-3xl font-bold text-[#002b49]">Vessel Profile</h1>
+          <p className="text-sm text-[#6b7280] mt-1">Your boat's specifications are used for travel time and fuel calculations throughout the planner.</p>
+        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-24"><Anchor className="w-8 h-8 text-[#002b49] animate-pulse" /></div>
+        ) : (
+          <div className="space-y-6">
+            {/* Identity */}
+            <div className="bg-white rounded-xl border border-[#e5e7eb] p-6">
+              <div className="flex items-center gap-2 mb-5"><Ship className="w-4 h-4 text-[#002b49]" /><h2 className="font-semibold text-[#002b49] text-sm uppercase tracking-wider font-mono">Vessel Identity</h2></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5"><Label className="text-xs uppercase tracking-wider text-[#374151] font-mono">Boat Name</Label><Input value={form.boat_name} onChange={set('boat_name')} placeholder="e.g. Sea Mist" /></div>
+                <div className="space-y-1.5"><Label className="text-xs uppercase tracking-wider text-[#374151] font-mono">Boat Type</Label>
+                  <Select value={form.boat_type} onValueChange={v => setForm(f=>({...f,boat_type:v}))}>
+                    <SelectTrigger><SelectValue placeholder="Select type..." /></SelectTrigger>
+                    <SelectContent>
+                      {['trawler','motoryacht','sailboat','powerboat','houseboat','catamaran','other'].map(t=><SelectItem key={t} value={t}>{t.charAt(0).toUpperCase()+t.slice(1)}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p
-                      className="text-[15px] font-semibold text-[#002b49]"
-                      style={{ fontFamily: "'Playfair Display', serif" }}
-                    >
-                      {user?.name}
-                    </p>
-                    <p
-                      className="text-[11px] text-[#42474d] mt-0.5"
-                      style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                    >
-                      {user?.email}
-                    </p>
-                  </div>
-                  <div className="w-10 h-10 rounded-full bg-[#002b49] flex items-center justify-center">
-                    <span
-                      className="text-white text-[13px] font-semibold"
-                      style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                    >
-                      {user?.name?.charAt(0)?.toUpperCase() ?? "GL"}
-                    </span>
-                  </div>
+                <div className="space-y-1.5"><Label className="text-xs uppercase tracking-wider text-[#374151] font-mono">Year Built</Label><Input value={form.year_built} onChange={set('year_built')} placeholder="e.g. 2018" type="number" /></div>
+                <div className="space-y-1.5"><Label className="text-xs uppercase tracking-wider text-[#374151] font-mono">Hull Material</Label>
+                  <Select value={form.hull_material} onValueChange={v => setForm(f=>({...f,hull_material:v}))}>
+                    <SelectTrigger><SelectValue placeholder="Select material..." /></SelectTrigger>
+                    <SelectContent>
+                      {['fiberglass','aluminum','steel','wood','composite'].map(m=><SelectItem key={m} value={m}>{m.charAt(0).toUpperCase()+m.slice(1)}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </div>
-
-              {/* Vessel identity */}
-              <div className="card-maritime p-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <Ship className="w-4 h-4 text-[#002b49]" />
-                  <h2
-                    className="text-[13px] font-semibold text-[#002b49] uppercase tracking-widest"
-                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                  >
-                    Vessel Identity
-                  </h2>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <TechInput
-                    label="Boat Name"
-                    type="text"
-                    value={form.boatName}
-                    onChange={(v) =>
-                      setForm((f) => ({ ...f, boatName: v as string }))
-                    }
-                    placeholder="e.g. Sea Wanderer"
-                  />
-                  <TechInput
-                    label="Boat Type"
-                    type="text"
-                    value={form.boatType}
-                    onChange={(v) =>
-                      setForm((f) => ({ ...f, boatType: v as string }))
-                    }
-                    placeholder="e.g. Trawler, Cruiser"
-                  />
-                </div>
-              </div>
-
-              {/* Dimensions & Performance */}
-              <div className="card-maritime p-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <Gauge className="w-4 h-4 text-[#002b49]" />
-                  <h2
-                    className="text-[13px] font-semibold text-[#002b49] uppercase tracking-widest"
-                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                  >
-                    Dimensions &amp; Performance
-                  </h2>
-                </div>
-                <p
-                  className="text-[11px] text-[#42474d] mb-5"
-                  style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                >
-                  Used for bridge clearance warnings and travel time calculations.
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <TechInput
-                    label="Draft"
-                    value={form.draft}
-                    onChange={(v) =>
-                      setForm((f) => ({ ...f, draft: v as number | null }))
-                    }
-                    unit="feet"
-                    placeholder="e.g. 3.5"
-                  />
-                  <TechInput
-                    label="Air Draft / Bridge Clearance"
-                    value={form.airDraft}
-                    onChange={(v) =>
-                      setForm((f) => ({ ...f, airDraft: v as number | null }))
-                    }
-                    unit="feet"
-                    placeholder="e.g. 15.5"
-                  />
-                  <TechInput
-                    label="Cruising Speed"
-                    value={form.cruisingSpeed}
-                    onChange={(v) =>
-                      setForm((f) => ({
-                        ...f,
-                        cruisingSpeed: v as number | null,
-                      }))
-                    }
-                    unit="knots"
-                    placeholder="e.g. 8"
-                  />
-                  <TechInput
-                    label="Fuel Range"
-                    value={form.fuelRange}
-                    onChange={(v) =>
-                      setForm((f) => ({ ...f, fuelRange: v as number | null }))
-                    }
-                    unit="naut. miles"
-                    placeholder="e.g. 400"
-                  />
-                  <TechInput
-                    label="Length Overall"
-                    value={form.lengthOverall}
-                    onChange={(v) =>
-                      setForm((f) => ({
-                        ...f,
-                        lengthOverall: v as number | null,
-                      }))
-                    }
-                    unit="feet"
-                    placeholder="e.g. 42"
-                  />
-                  <TechInput
-                    label="Beam"
-                    value={form.beam}
-                    onChange={(v) =>
-                      setForm((f) => ({ ...f, beam: v as number | null }))
-                    }
-                    unit="feet"
-                    placeholder="e.g. 14"
-                  />
-                </div>
-              </div>
-
-              {/* Save button */}
-              <div className="flex justify-end">
-                <button
-                  onClick={() => upsert.mutate(form)}
-                  disabled={upsert.isPending}
-                  className="btn-primary px-8 disabled:opacity-60"
-                >
-                  {upsert.isPending ? "Saving…" : "Save Vessel Profile"}
-                </button>
               </div>
             </div>
+            {/* Dimensions */}
+            <div className="bg-white rounded-xl border border-[#e5e7eb] p-6">
+              <div className="flex items-center gap-2 mb-5"><Ruler className="w-4 h-4 text-[#002b49]" /><h2 className="font-semibold text-[#002b49] text-sm uppercase tracking-wider font-mono">Dimensions</h2></div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {([['length_overall','Length Overall','ft'],['beam','Beam','ft'],['draft','Draft','ft'],['air_draft','Air Draft / Bridge Clearance','ft']] as const).map(([k,l,u])=>(
+                  <div key={k} className="space-y-1.5"><Label className="text-xs uppercase tracking-wider text-[#374151] font-mono">{l} <span className="text-[#9ca3af] normal-case">({u})</span></Label><Input value={form[k]} onChange={set(k)} placeholder="0.0" type="number" step="0.1" /></div>
+                ))}
+              </div>
+            </div>
+            {/* Performance */}
+            <div className="bg-white rounded-xl border border-[#e5e7eb] p-6">
+              <div className="flex items-center gap-2 mb-5"><Gauge className="w-4 h-4 text-[#002b49]" /><h2 className="font-semibold text-[#002b49] text-sm uppercase tracking-wider font-mono">Performance &amp; Fuel</h2></div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {([['cruising_speed','Cruising Speed','kts'],['fuel_capacity','Fuel Capacity','gal'],['fuel_consumption','Fuel Consumption','gph'],['fuel_range','Fuel Range','nm']] as const).map(([k,l,u])=>(
+                  <div key={k} className="space-y-1.5"><Label className="text-xs uppercase tracking-wider text-[#374151] font-mono">{l} <span className="text-[#9ca3af] normal-case">({u})</span></Label><Input value={form[k]} onChange={set(k)} placeholder="0" type="number" step="0.1" /></div>
+                ))}
+              </div>
+            </div>
+            {/* Engine & Notes */}
+            <div className="bg-white rounded-xl border border-[#e5e7eb] p-6">
+              <div className="flex items-center gap-2 mb-5"><Wind className="w-4 h-4 text-[#002b49]" /><h2 className="font-semibold text-[#002b49] text-sm uppercase tracking-wider font-mono">Engine &amp; Notes</h2></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5"><Label className="text-xs uppercase tracking-wider text-[#374151] font-mono">Engine Type</Label>
+                  <Select value={form.engine_type} onValueChange={v => setForm(f=>({...f,engine_type:v}))}>
+                    <SelectTrigger><SelectValue placeholder="Select engine..." /></SelectTrigger>
+                    <SelectContent>
+                      {[['diesel_single','Diesel Single'],['diesel_twin','Diesel Twin'],['gas_single','Gas Single'],['gas_twin','Gas Twin'],['electric','Electric'],['hybrid','Hybrid'],['sail','Sail']].map(([v,l])=><SelectItem key={v} value={v}>{l}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5 sm:col-span-2"><Label className="text-xs uppercase tracking-wider text-[#374151] font-mono">Notes</Label><Textarea value={form.notes} onChange={set('notes')} placeholder="Any additional notes about your vessel..." rows={3} className="resize-none" /></div>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button onClick={() => save.mutate()} disabled={save.isPending} className="bg-[#002b49] hover:bg-[#003a63] text-white gap-2">
+                <Save className="w-4 h-4" />{save.isPending ? 'Saving...' : 'Save Vessel Profile'}
+              </Button>
+            </div>
           </div>
-        </main>
+        )}
       </div>
-    </div>
+    </AppLayout>
   );
 }

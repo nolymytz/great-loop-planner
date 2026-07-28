@@ -62,10 +62,10 @@
 - [x] Open trip in planner
 
 ## Authentication & User Flow
-- [x] Login/sign-up with Manus OAuth
-- [x] Persistent session across devices (cloud sync)
-- [x] Elegant landing page for unauthenticated users
-- [x] Auth-gated pages with sign-in prompts
+- [x] Login/sign-up with Supabase Auth (email + password)
+- [x] Persistent session across devices (cloud sync via Supabase)
+  - [x] Elegant landing page for unauthenticated users
+  - [x] Auth-gated pages with sign-in prompts
 
 ## Polish & Branding
 - [x] App logo / anchor icon branding
@@ -78,6 +78,22 @@
 - [x] Redesign: AppNav with glassmorphism top bar and JetBrains Mono typography
 - [x] Redesign: TripsPage with cockpit dashboard sidebar layout and premium trip cards
 - [x] Redesign: SettingsPage with technical instrument-style form fields
+## Supabase Migration (completed)
+- [x] Supabase PostgreSQL database created (project: idfsanqtjyrmuqqxwasz, us-east-1)
+- [x] All 9 tables with Row Level Security (users, trips, waypoints, pois, journal_entries, vessel_profiles, maintenance_tasks, wishlist_items, dream_boats)
+- [x] supabase.ts client singleton + all TypeScript types
+- [x] AuthContext.tsx — Supabase Auth (signIn, signUp, signOut, user, isAuthenticated)
+- [x] AuthPage.tsx — sign in / sign up page
+- [x] AppLayout.tsx — Supabase-native sidebar layout with all 10 nav items
+- [x] AppNav.tsx — Supabase Auth, removed tRPC/Manus
+- [x] CreateTripDialog.tsx — Supabase insert, removed tRPC
+- [x] TripsPage.tsx — Supabase queries, removed tRPC
+- [x] SettingsPage.tsx — Supabase vessel_profiles upsert, removed tRPC
+- [x] PlannerPage.tsx — Supabase queries for trips/waypoints/pois/vessel, removed tRPC
+- [x] WaypointDetailPanel.tsx — Supabase journal_entries + waypoints, removed tRPC
+- [x] PoiDetailPanel.tsx — Supabase waypoints insert, removed tRPC
+- [x] Home.tsx — Supabase AuthContext, Link to /auth, removed Manus OAuth
+- [x] New pages: FuelCalcPage, WeatherPage, CommunityPage, MaintenancePage, LogbookPage, MarinasPage, DreamBoatPage, WishlistPage
 
 ## Future Enhancements
 - [ ] Drag-to-reorder waypoints in sidebar (v2)
@@ -89,3 +105,8 @@
 - [ ] Mobile app (iOS/Android via Expo) (v2)
 - [ ] Shared trip view (read-only link) (v2)
 - [ ] Community POI contributions (v2)
+- [ ] Boat services directory: searchable listings for boatyards, mechanics, riggers, canvas/upholstery, diesel/outboard specialists, and marine electricians along the Great Loop — with reviews, contact info, specialties, and "Add to Trip" for scheduling haul-outs or repairs at a stop (v2)
+- [ ] Marina real-time availability portal: marina-facing dashboard where marinas can submit and update live slip/mooring/anchorage availability, transient rates, amenities, and wait times — displayed to cruisers on the map and POI detail panels with a "last updated" timestamp (v2)
+- [ ] "Places I'd Like to Visit" wishlist board — pre-trip bucket list of destinations, separate from the active itinerary (v2)
+- [ ] "Things I'd Like to Do" activity wishlist — experiences, events, and activities to consider along the route (v2)
+- [ ] "Boat Must-Haves" gear and equipment checklist — provisioning, safety gear, and upgrades to complete before departure (v2)

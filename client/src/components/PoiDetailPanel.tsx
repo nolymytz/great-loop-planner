@@ -1,42 +1,53 @@
-import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { supabase, type Poi } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { X, Star, Phone, Globe, MapPin, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { POI_CATEGORIES } from "@shared/types";
-
-// Inline type to avoid importing from server-side drizzle schema
-interface Poi {
-  id: number;
-  name: string;
-  category: string;
-  lat: number;
-  lng: number;
-  address?: string | null;
-  description?: string | null;
-  phone?: string | null;
-  website?: string | null;
-  rating?: number | null;
-  imageUrl?: string | null;
-  tags?: unknown;
-}
+import { useState } from "react";
 
 interface Props {
   poi: Poi;
-  tripId: number | null;
+  tripId: string | null;
   onClose: () => void;
   onAddedToTrip: () => void;
 }
 
 export function PoiDetailPanel({ poi, tripId, onClose, onAddedToTrip }: Props) {
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const catInfo = POI_CATEGORIES.find(c => c.value === poi.category);
-  const addWaypoint = trpc.waypoints.add.useMutation({
-    onSuccess: () => { toast.success(`${poi.name} added to trip!`); onAddedToTrip(); },
-    onError: () => toast.error("Failed to add to trip"),
-  });
+  const [adding, setAdding] = useState(false);
+
+  const handleAddToTrip = async () => {
+    if (!tripId || !user) return;
+    setAdding(true);
+    // Get current max sort_order for this trip
+    const { data: existing } = await supabase
+      .from("waypoints")
+      .select("sort_order")
+      .eq("trip_id", tripId)
+      .order("sort_order", { ascending: false })
+      .limit(1);
+    const nextOrder = existing && existing.length > 0 ? (existing[0].sort_order + 1) : 0;
+
+    const { error } = await supabase.from("waypoints").insert({
+      trip_id: tripId,
+      user_id: user.id,
+      name: poi.name,
+      lat: poi.lat,
+      lng: poi.lng,
+      address: poi.address ?? null,
+      sort_order: nextOrder,
+      date_tbd: true,
+      poi_id: poi.id,
+    });
+    setAdding(false);
+    if (error) { toast.error("Failed to add to trip"); return; }
+    toast.success(`${poi.name} added to trip!`);
+    onAddedToTrip();
+  };
 
   return (
     <div className="absolute right-0 top-0 bottom-0 w-80 xl:w-96 bg-white border-l border-border shadow-xl flex flex-col z-20 overflow-hidden">
@@ -105,21 +116,9 @@ export function PoiDetailPanel({ poi, tripId, onClose, onAddedToTrip }: Props) {
 
       <div className="p-4 border-t border-border">
         {isAuthenticated && tripId ? (
-          <Button
-            className="w-full gap-2"
-            onClick={() => addWaypoint.mutate({
-              tripId,
-              name: poi.name,
-              lat: poi.lat,
-              lng: poi.lng,
-              address: poi.address ?? undefined,
-              category: poi.category,
-              poiId: poi.id,
-            })}
-            disabled={addWaypoint.isPending}
-          >
+          <Button className="w-full gap-2" onClick={handleAddToTrip} disabled={adding}>
             <Plus className="w-4 h-4" />
-            {addWaypoint.isPending ? "Adding…" : "Add to Trip"}
+            {adding ? "Adding…" : "Add to Trip"}
           </Button>
         ) : (
           <p className="text-xs text-muted-foreground text-center">Sign in and open a trip to add this stop.</p>
@@ -128,3 +127,4 @@ export function PoiDetailPanel({ poi, tripId, onClose, onAddedToTrip }: Props) {
     </div>
   );
 }
+
