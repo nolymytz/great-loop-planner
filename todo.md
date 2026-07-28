@@ -73,6 +73,11 @@
 - [x] Responsive layout
 - [x] Smooth transitions and hover effects
 - [x] Vitest test suite (13 tests passing)
+- [x] Redesign: Sea Mist design system (glassmorphism nav, Playfair Display + JetBrains Mono)
+- [x] Redesign: Landing page — hero, stats bar, Tactical Suite cards, telemetry section, CTA
+- [x] Redesign: AppNav with glassmorphism top bar and JetBrains Mono typography
+- [x] Redesign: TripsPage with cockpit dashboard sidebar layout and premium trip cards
+- [x] Redesign: SettingsPage with technical instrument-style form fields
 
 ## Future Enhancements
 - [ ] Drag-to-reorder waypoints in sidebar (v2)

@@ -1,181 +1,436 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap");
-
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================
+   SEA MIST DESIGN SYSTEM — Great Loop Planner
+   Fonts: Playfair Display (headlines) | Hanken Grotesk (body) | JetBrains Mono (labels/data)
+   ============================================================ */
+
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  /* --- Color Tokens --- */
+  --color-background: oklch(97.8% 0 0);
+  --color-foreground: oklch(14% 0.005 220);
+  --color-card: oklch(100% 0 0);
+  --color-card-foreground: oklch(14% 0.005 220);
+  --color-popover: oklch(100% 0 0);
+  --color-popover-foreground: oklch(14% 0.005 220);
 
-  /* Nautical custom colors */
-  --color-navy-50:  oklch(0.97 0.01 240);
-  --color-navy-100: oklch(0.93 0.02 240);
-  --color-navy-200: oklch(0.85 0.04 240);
-  --color-navy-300: oklch(0.72 0.07 240);
-  --color-navy-400: oklch(0.58 0.10 240);
-  --color-navy-500: oklch(0.45 0.13 240);
-  --color-navy-600: oklch(0.36 0.14 240);
-  --color-navy-700: oklch(0.30 0.14 240);
-  --color-navy-800: oklch(0.23 0.12 240);
-  --color-navy-900: oklch(0.18 0.10 240);
-  --color-navy-950: oklch(0.13 0.08 240);
+  /* Primary: Deep Navy #002b49 */
+  --color-primary: oklch(18.5% 0.055 240);
+  --color-primary-foreground: oklch(100% 0 0);
 
-  --color-gold-300: oklch(0.88 0.12 80);
-  --color-gold-400: oklch(0.80 0.14 80);
-  --color-gold-500: oklch(0.72 0.16 80);
-  --color-gold-600: oklch(0.62 0.15 80);
+  /* Secondary: Bioluminescent Cyan #00e3fd */
+  --color-secondary: oklch(88% 0.15 200);
+  --color-secondary-foreground: oklch(18.5% 0.055 240);
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+  --color-muted: oklch(94% 0.005 220);
+  --color-muted-foreground: oklch(42% 0.012 220);
+  --color-accent: oklch(88% 0.15 200);
+  --color-accent-foreground: oklch(18.5% 0.055 240);
+  --color-destructive: oklch(40% 0.18 25);
+  --color-destructive-foreground: oklch(100% 0 0);
+  --color-border: oklch(88% 0.005 220);
+  --color-input: oklch(88% 0.005 220);
+  --color-ring: oklch(88% 0.15 200);
+
+  /* Maritime semantic colors */
+  --color-navy: oklch(18.5% 0.055 240);
+  --color-navy-light: oklch(25% 0.06 240);
+  --color-cyan: oklch(88% 0.15 200);
+  --color-cyan-bright: oklch(82% 0.18 200);
+  --color-hull-grey: oklch(94% 0.004 220);
+  --color-surface-dim: oklch(85.5% 0.005 220);
+
+  /* --- Radius (ROUND_FOUR = 4px default) --- */
+  --radius: 0.25rem;
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+
+  /* --- Typography --- */
+  --font-sans: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  /* --- Shadows (navy-tinted, diffused) --- */
+  --shadow-card: 0px 2px 8px oklch(18.5% 0.055 240 / 0.05);
+  --shadow-modal: 0px 10px 30px oklch(18.5% 0.055 240 / 0.08);
+  --shadow-elevated: 0px 4px 16px oklch(18.5% 0.055 240 / 0.1);
 }
 
-:root {
-  --radius: 0.625rem;
-
-  /* Light theme — clean nautical whites and navy */
-  --background: oklch(0.99 0.005 240);
-  --foreground: oklch(0.15 0.04 240);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.04 240);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.04 240);
-  --primary: oklch(0.30 0.14 240);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.96 0.01 240);
-  --secondary-foreground: oklch(0.25 0.08 240);
-  --muted: oklch(0.96 0.01 240);
-  --muted-foreground: oklch(0.52 0.05 240);
-  --accent: oklch(0.93 0.03 240);
-  --accent-foreground: oklch(0.25 0.08 240);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.90 0.015 240);
-  --input: oklch(0.90 0.015 240);
-  --ring: oklch(0.30 0.14 240);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.97 0.01 240);
-  --sidebar-foreground: oklch(0.15 0.04 240);
-  --sidebar-primary: oklch(0.30 0.14 240);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.93 0.03 240);
-  --sidebar-accent-foreground: oklch(0.25 0.08 240);
-  --sidebar-border: oklch(0.90 0.015 240);
-  --sidebar-ring: oklch(0.30 0.14 240);
-}
-
+/* ============================================================
+   BASE LAYER
+   ============================================================ */
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  *, *::before, *::after {
+    box-sizing: border-box;
   }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
   }
+
+  /* Headings use Playfair Display */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--color-foreground);
   }
+
+  /* Monospace for labels, badges, data */
+  .font-mono, code, kbd, samp, pre {
+    font-family: var(--font-mono);
+  }
+
+  /* Selection */
+  ::selection {
+    background-color: oklch(88% 0.15 200 / 0.3);
+    color: var(--color-navy);
+  }
+
+  /* Focus rings */
+  :focus-visible {
+    outline: 2px solid var(--color-cyan);
+    outline-offset: 2px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--color-hull-grey); }
+  ::-webkit-scrollbar-thumb { background: oklch(70% 0.02 220); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: oklch(55% 0.03 240); }
 }
 
+/* ============================================================
+   MARITIME COMPONENT UTILITIES
+   ============================================================ */
 @layer utilities {
-  .font-serif {
+  /* --- Typography Scale --- */
+  .text-display-lg {
     font-family: var(--font-serif);
+    font-size: clamp(40px, 5vw, 56px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
   }
-  .font-sans {
+
+  .text-headline-md {
+    font-family: var(--font-serif);
+    font-size: clamp(24px, 3vw, 32px);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .text-headline-sm {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .text-body-lg {
     font-family: var(--font-sans);
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.6;
   }
 
-  /* Nautical gradient background */
-  .bg-nautical-gradient {
-    background: linear-gradient(135deg, oklch(0.23 0.12 240) 0%, oklch(0.30 0.14 240) 100%);
+  .text-body-md {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
   }
 
-  /* Gold gradient text */
-  .text-gradient-gold {
-    background: linear-gradient(135deg, oklch(0.80 0.14 80) 0%, oklch(0.72 0.16 80) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .text-label-caps {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
-  /* Glassmorphism */
-  .glass {
-    background: rgba(255, 255, 255, 0.85);
+  .text-label-sm {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  .text-data-lg {
+    font-family: var(--font-serif);
+    font-size: clamp(28px, 3vw, 36px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  /* --- Glassmorphism --- */
+  .glass-nav {
+    background: oklch(100% 0 0 / 0.85);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border-bottom: 1px solid oklch(88% 0.005 220);
+  }
+
+  .glass-card {
+    background: oklch(100% 0 0 / 0.9);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    border: 1px solid oklch(88% 0.005 220);
   }
 
-  /* Navy color utilities */
-  .bg-navy-50  { background-color: var(--color-navy-50); }
-  .bg-navy-100 { background-color: var(--color-navy-100); }
-  .bg-navy-200 { background-color: var(--color-navy-200); }
-  .bg-navy-800 { background-color: var(--color-navy-800); }
-  .bg-navy-900 { background-color: var(--color-navy-900); }
-  .bg-navy-950 { background-color: var(--color-navy-950); }
-  .text-navy-200 { color: var(--color-navy-200); }
-  .text-navy-300 { color: var(--color-navy-300); }
-  .text-navy-400 { color: var(--color-navy-400); }
-  .text-navy-700 { color: var(--color-navy-700); }
-  .text-navy-900 { color: var(--color-navy-900); }
-  .hover\:bg-navy-100:hover { background-color: var(--color-navy-100); }
+  /* --- Maritime Badges / Chips --- */
+  .badge-maritime {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    background: oklch(88% 0.15 200 / 0.15);
+    color: oklch(35% 0.1 200);
+    border: 1px solid oklch(88% 0.15 200 / 0.4);
+    border-radius: var(--radius-full);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
 
-  /* Gold color utilities */
-  .text-gold-300 { color: var(--color-gold-300); }
-  .text-gold-400 { color: var(--color-gold-400); }
-  .bg-gold-500   { background-color: var(--color-gold-500); }
-  .hover\:bg-gold-600:hover { background-color: var(--color-gold-600); }
+  .badge-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    background: oklch(88% 0.15 200 / 0.2);
+    color: oklch(30% 0.12 200);
+    border: 1px solid oklch(88% 0.15 200 / 0.5);
+    border-radius: var(--radius-full);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
 
-  /* Container customization */
+  .badge-live::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: oklch(65% 0.18 160);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  /* --- Cards --- */
+  .card-maritime {
+    background: white;
+    border: 1px solid oklch(88% 0.005 220);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 180ms cubic-bezier(0.23, 1, 0.32, 1),
+                transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .card-maritime:hover {
+    box-shadow: var(--shadow-elevated);
+    transform: translateY(-1px);
+  }
+
+  .card-navy {
+    background: var(--color-navy);
+    color: white;
+    border-radius: var(--radius-lg);
+  }
+
+  /* --- Buttons --- */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 24px;
+    background: var(--color-navy);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 160ms cubic-bezier(0.23, 1, 0.32, 1),
+                transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .btn-primary:hover { background: oklch(22% 0.06 240); }
+  .btn-primary:active { transform: scale(0.97); }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 24px;
+    background: transparent;
+    color: var(--color-navy);
+    border: 1px solid var(--color-navy);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 160ms cubic-bezier(0.23, 1, 0.32, 1),
+                transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .btn-ghost:hover { background: oklch(18.5% 0.055 240 / 0.05); }
+  .btn-ghost:active { transform: scale(0.97); }
+
+  /* --- Sidebar --- */
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: oklch(42% 0.012 220);
+    cursor: pointer;
+    transition: all 150ms cubic-bezier(0.23, 1, 0.32, 1);
+    border-left: 2px solid transparent;
+    text-transform: uppercase;
+  }
+
+  .sidebar-item:hover {
+    background: oklch(88% 0.15 200 / 0.08);
+    color: var(--color-navy);
+  }
+
+  .sidebar-item.active {
+    background: oklch(88% 0.15 200 / 0.12);
+    color: oklch(30% 0.1 200);
+    border-left-color: oklch(82% 0.18 200);
+  }
+
+  /* --- Stats --- */
+  .stat-divider {
+    border-right: 1px solid oklch(88% 0.005 220);
+  }
+
+  /* --- Cyan accent text --- */
+  .text-cyan-accent {
+    color: oklch(55% 0.18 200);
+  }
+
+  .text-cyan-bright {
+    color: oklch(65% 0.2 195);
+  }
+
+  /* --- Input fields --- */
+  .input-maritime {
+    background: white;
+    border: 1px solid oklch(80% 0.005 220);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--color-foreground);
+    transition: border-color 150ms ease;
+    width: 100%;
+  }
+
+  .input-maritime:focus {
+    outline: none;
+    border-color: oklch(82% 0.18 200);
+    box-shadow: 0 0 0 3px oklch(88% 0.15 200 / 0.15);
+  }
+
+  /* --- Section dividers --- */
+  .section-divider {
+    border-top: 1px solid oklch(88% 0.005 220);
+  }
+
+  /* --- Container --- */
   .container {
-    @apply mx-auto px-4 sm:px-6 lg:px-8;
+    width: 100%;
     max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
   }
 
-  /* Flex min-width fix */
-  .flex {
-    min-width: 0;
-    min-height: 0;
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 64px;
+      padding-right: 64px;
+    }
   }
 
-  /* Button active scale */
-  button:active {
-    transform: scale(0.97);
-    transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  /* --- Flex min-size fix --- */
+  .flex { min-width: 0; min-height: 0; }
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 400ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.animate-fade-in {
+  animation: fade-in 300ms ease both;
+}
+
+/* Stagger delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

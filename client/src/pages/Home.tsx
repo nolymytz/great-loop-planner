@@ -1,220 +1,590 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { startLogin } from "@/const";
-import { Button } from "@/components/ui/button";
-import { AppNav } from "@/components/AppNav";
-import { Anchor, Map, BookOpen, Ship, Star, ArrowRight, Navigation, Compass } from "lucide-react";
-import { useLocation } from "wouter";
+import {
+  Anchor,
+  BarChart3,
+  Bell,
+  BookOpen,
+  ChevronRight,
+  Cloud,
+  Compass,
+  Download,
+  Fuel,
+  Map,
+  MapPin,
+  Settings,
+  Ship,
+  Users,
+  Wrench,
+  Zap,
+} from "lucide-react";
+import { Link } from "wouter";
 
-const FEATURES = [
-  {
-    icon: Map,
-    title: "Interactive Route Map",
-    description: "Visualize the full Great Loop with the primary route and all popular alternates — Erie Canal, Champlain Canal, Trent-Severn, and Lower Mississippi — displayed on a live map.",
-  },
-  {
-    icon: Navigation,
-    title: "Itinerary & Distance Planner",
-    description: "Build your stop-by-stop itinerary with per-leg distance and estimated travel time calculations. Assign dates or mark stops as TBD as your plans evolve over the years.",
-  },
-  {
-    icon: Compass,
-    title: "POI Discovery",
-    description: "Discover Marinas, Anchorages, Fuel Docks, Restaurants, Museums, and Attractions along the route. Filter by category, read details, and add any stop directly to your trip.",
-  },
-  {
-    icon: BookOpen,
-    title: "Trip Journal & Notes",
-    description: "Attach personal notes, journal entries, and to-do lists to individual stops. Capture your research, dreams, and plans in one organized place.",
-  },
-  {
-    icon: Ship,
-    title: "Vessel Profile",
-    description: "Store your boat's draft, air draft/bridge clearance, cruising speed, and fuel range. Your specs inform planning and help you identify potential route constraints.",
-  },
-  {
-    icon: Star,
-    title: "Multi-Trip & Long-Term Planning",
-    description: "Save multiple trips and plan across years. Pause, resume, and refine your voyage as your departure date approaches — the app grows with your plans.",
-  },
-];
-
-const STATS = [
-  { value: "6,000+", label: "Nautical Miles" },
-  { value: "35+", label: "States & Provinces" },
-  { value: "1 Year", label: "Typical Journey" },
-  { value: "∞", label: "Memories Made" },
-];
+/* ─── Yacht hero image (public domain / Unsplash-style URL) ─── */
+const YACHT_IMG =
+  "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800&q=80";
+const MAP_IMG =
+  "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=900&q=80";
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
-  const [, navigate] = useLocation();
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppNav />
-
-      {/* Hero */}
-      <section className="relative min-h-screen flex items-center overflow-hidden pt-16">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-navy-950 via-navy-900 to-navy-800" />
-        <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-        }} />
-
-        <div className="container relative z-10 py-20">
-          <div className="max-w-3xl">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center">
-                <Anchor className="w-5 h-5 text-gold-400" />
-              </div>
-              <span className="text-gold-300 text-sm font-medium tracking-wider uppercase">America's Great Loop</span>
-            </div>
-
-            <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
-              Plan Your<br />
-              <span className="text-gradient-gold">Great Loop</span><br />
-              Voyage
-            </h1>
-
-            <p className="text-navy-200 text-xl leading-relaxed mb-10 max-w-xl">
-              The dedicated planning tool for Loopers. Map your route, discover stops, journal your plans, and build your dream voyage — one stop at a time, over as many years as it takes.
-            </p>
-
-            <div className="flex flex-wrap gap-4">
-              {isAuthenticated ? (
-                <Button
-                  size="lg"
-                  className="gap-2 bg-gold-500 hover:bg-gold-600 text-navy-950 font-semibold text-base px-8"
-                  onClick={() => navigate("/trips")}
-                >
-                  Open My Trips <ArrowRight className="w-4 h-4" />
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    size="lg"
-                    className="gap-2 bg-gold-500 hover:bg-gold-600 text-navy-950 font-semibold text-base px-8"
-                    onClick={() => startLogin()}
-                  >
-                    Start Planning Free <ArrowRight className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="gap-2 border-white/30 text-white hover:bg-white/10 text-base px-8"
-                    onClick={() => navigate("/planner")}
-                  >
-                    Explore the Map
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/40">
-          <div className="w-px h-8 bg-white/20 animate-pulse" />
-          <span className="text-xs tracking-widest uppercase">Scroll</span>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="bg-white border-y border-border py-12">
-        <div className="container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {STATS.map(stat => (
-              <div key={stat.label} className="text-center">
-                <p className="font-serif text-3xl font-bold text-navy-900">{stat.value}</p>
-                <p className="text-muted-foreground text-sm mt-1">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-24 bg-background">
-        <div className="container">
-          <div className="text-center mb-16">
-            <h2 className="font-serif text-4xl font-semibold mb-4">Everything a Looper Needs</h2>
-            <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-              Built specifically for the Great Loop — not a generic trip planner adapted for boats.
-            </p>
+    <div className="min-h-screen bg-[#f9f9f9] font-sans">
+      {/* ══════════════════════════════════════════
+          TOP NAVIGATION BAR — glassmorphism
+      ══════════════════════════════════════════ */}
+      <header className="glass-nav fixed top-0 left-0 right-0 z-50 h-14">
+        <div className="max-w-[1280px] mx-auto px-6 h-full flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <Anchor className="w-4 h-4 text-[#002b49]" strokeWidth={2.5} />
+            <span
+              className="text-[13px] font-semibold tracking-wide text-[#002b49]"
+              style={{ fontFamily: "'JetBrains Mono', monospace" }}
+            >
+              Great Loop Planner
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {FEATURES.map((feature, i) => (
-              <div
-                key={feature.title}
-                className="group p-6 rounded-2xl border border-border bg-white hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+          {/* Center nav */}
+          <nav className="hidden md:flex items-center gap-1">
+            {["Route", "Weather", "Marinas", "Logbook"].map((item, i) => (
+              <a
+                key={item}
+                href="#"
+                className={`px-4 py-1.5 text-[11px] tracking-widest uppercase transition-colors ${
+                  i === 0
+                    ? "text-[#002b49] border-b-2 border-[#00e3fd] font-medium"
+                    : "text-[#42474d] hover:text-[#002b49]"
+                }`}
+                style={{ fontFamily: "'JetBrains Mono', monospace" }}
               >
-                <div className="w-10 h-10 rounded-xl bg-navy-50 flex items-center justify-center mb-4 group-hover:bg-navy-100 transition-colors">
-                  <feature.icon className="w-5 h-5 text-navy-700" />
-                </div>
-                <h3 className="font-serif font-semibold text-lg mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
-              </div>
+                {item}
+              </a>
             ))}
+          </nav>
+
+          {/* Right actions */}
+          <div className="flex items-center gap-3">
+            <button className="p-1.5 text-[#42474d] hover:text-[#002b49] transition-colors">
+              <Bell className="w-4 h-4" />
+            </button>
+            <button className="p-1.5 text-[#42474d] hover:text-[#002b49] transition-colors">
+              <Settings className="w-4 h-4" />
+            </button>
+            {isAuthenticated ? (
+              <Link href="/trips">
+                <div className="w-7 h-7 rounded-full bg-[#002b49] flex items-center justify-center cursor-pointer">
+                  <span className="text-white text-[10px] font-mono">GL</span>
+                </div>
+              </Link>
+            ) : (
+              <button
+                onClick={() => startLogin()}
+                className="btn-primary text-[10px] py-1.5 px-4"
+              >
+                Sign In
+              </button>
+            )}
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* Route highlight */}
-      <section className="py-20 bg-navy-950 text-white">
-        <div className="container">
-          <div className="max-w-2xl mx-auto text-center">
-            <Anchor className="w-10 h-10 mx-auto mb-6 text-gold-400" />
-            <h2 className="font-serif text-4xl font-semibold mb-4">The Loop in Numbers</h2>
-            <p className="text-navy-200 text-lg leading-relaxed mb-8">
-              America's Great Loop is a continuous waterway circumnavigating the eastern United States — through the Atlantic Intracoastal Waterway, the Gulf of Mexico, the Mississippi River system, the Great Lakes, and the Canadian canals. It is one of the world's great cruising adventures.
+      {/* ══════════════════════════════════════════
+          MAIN LAYOUT — sidebar + content
+      ══════════════════════════════════════════ */}
+      <div className="flex pt-14 min-h-screen">
+        {/* ── LEFT SIDEBAR ── */}
+        <aside className="hidden lg:flex flex-col w-56 shrink-0 border-r border-[#e2e2e2] bg-white sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
+          {/* Vessel header */}
+          <div className="px-4 py-5 border-b border-[#e2e2e2]">
+            <div className="flex items-center gap-2 mb-1">
+              <Ship className="w-3.5 h-3.5 text-[#42474d]" />
+              <span
+                className="text-[11px] font-medium text-[#002b49]"
+                style={{ fontFamily: "'JetBrains Mono', monospace" }}
+              >
+                M/V Sea Mist
+              </span>
+            </div>
+            <p
+              className="text-[10px] text-[#42474d] pl-5"
+              style={{ fontFamily: "'JetBrains Mono', monospace" }}
+            >
+              Great Loop Expedition
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+          </div>
+
+          {/* Nav items */}
+          <nav className="flex-1 px-3 py-4 space-y-0.5">
+            {[
+              { icon: BarChart3, label: "Dashboard", active: false },
+              { icon: Map, label: "Route Map", active: true },
+              { icon: Fuel, label: "Fuel Calculator", active: false },
+              { icon: Wrench, label: "Maintenance", active: false },
+              { icon: Users, label: "Community", active: false },
+            ].map(({ icon: Icon, label, active }) => (
+              <button
+                key={label}
+                className={`sidebar-item w-full text-left ${active ? "active" : ""}`}
+              >
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                {label}
+              </button>
+            ))}
+          </nav>
+
+          {/* Upgrade CTA */}
+          <div className="px-3 pb-4">
+            <button className="w-full py-2.5 px-3 bg-[#002b49] text-white rounded text-[10px] font-mono tracking-widest uppercase hover:bg-[#001629] transition-colors">
+              Upgrade to Pro
+            </button>
+          </div>
+        </aside>
+
+        {/* ── MAIN CONTENT ── */}
+        <main className="flex-1 overflow-x-hidden">
+          {/* ── HERO SECTION ── */}
+          <section className="px-8 lg:px-12 py-12 border-b border-[#e2e2e2] bg-white">
+            <div className="max-w-[1100px] mx-auto grid lg:grid-cols-2 gap-10 items-center">
+              {/* Left: copy */}
+              <div className="animate-fade-in-up">
+                <span className="badge-maritime mb-5 inline-flex">
+                  Maritime Precision
+                </span>
+                <h1 className="text-display-lg text-[#002b49] mb-4 leading-[1.1]">
+                  Navigate the Loop
+                  <br />
+                  with{" "}
+                  <em className="not-italic text-cyan-accent italic">
+                    Coastal Luxury.
+                  </em>
+                </h1>
+                <p className="text-body-lg text-[#42474d] mb-8 max-w-md">
+                  A high-performance planning suite for the modern mariner.
+                  Execute your 6,000-mile journey with technical accuracy,
+                  real-time telemetry, and curated coastal insights.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {isAuthenticated ? (
+                    <Link href="/trips">
+                      <button className="btn-primary">
+                        Start Planning
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => startLogin()}
+                      className="btn-primary"
+                    >
+                      Start Planning
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  <button className="btn-ghost">View Charts</button>
+                </div>
+              </div>
+
+              {/* Right: yacht photo + stat card */}
+              <div className="relative animate-fade-in-up delay-200">
+                <div className="rounded-lg overflow-hidden border border-[#e2e2e2] shadow-[0_4px_20px_rgba(0,43,73,0.08)]">
+                  <img
+                    src={YACHT_IMG}
+                    alt="Luxury yacht on turquoise water"
+                    className="w-full h-64 lg:h-72 object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400' viewBox='0 0 800 400'%3E%3Crect fill='%23e8f4f8' width='800' height='400'/%3E%3Ctext fill='%23002b49' font-family='serif' font-size='24' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EGreat Loop Route%3C/text%3E%3C/svg%3E";
+                    }}
+                  />
+                </div>
+                {/* Stat overlay card */}
+                <div className="absolute top-4 right-4 glass-card rounded-lg px-4 py-3 shadow-[0_4px_16px_rgba(0,43,73,0.12)]">
+                  <p
+                    className="text-[9px] text-[#42474d] uppercase tracking-widest mb-1"
+                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                  >
+                    Avg. Cruise
+                  </p>
+                  <p
+                    className="text-[22px] font-bold text-[#002b49] leading-none"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    8 kts
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ── STATS BAR ── */}
+          <section className="bg-white border-b border-[#e2e2e2] px-8 lg:px-12 py-6">
+            <div className="max-w-[1100px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-0">
               {[
-                { label: "Primary Route", value: "Erie Canal", sub: "Troy, NY → Buffalo, NY" },
-                { label: "Alternate Route", value: "Champlain Canal", sub: "Troy, NY → Montreal, QC" },
-                { label: "Southern Alternate", value: "Lower Mississippi", sub: "Cairo, IL → New Orleans, LA" },
-              ].map(item => (
-                <div key={item.label} className="p-4 rounded-xl bg-white/5 border border-white/10">
-                  <p className="text-xs text-navy-400 uppercase tracking-wide mb-1">{item.label}</p>
-                  <p className="font-serif font-semibold text-lg text-gold-300">{item.value}</p>
-                  <p className="text-xs text-navy-300 mt-1">{item.sub}</p>
+                { label: "Total Distance", value: "6,240 NM" },
+                { label: "Est. Duration", value: "285 Days" },
+                { label: "Ports & Marinas", value: "142" },
+                { label: "Fuel Efficiency", value: "1.8 G/NM" },
+              ].map((stat, i) => (
+                <div
+                  key={stat.label}
+                  className={`px-6 py-2 ${i < 3 ? "border-r border-[#e2e2e2]" : ""} ${i < 2 ? "border-b border-[#e2e2e2] lg:border-b-0" : ""}`}
+                >
+                  <p
+                    className="text-[10px] text-[#42474d] uppercase tracking-widest mb-1"
+                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                  >
+                    {stat.label}
+                  </p>
+                  <p
+                    className="text-[28px] font-bold text-[#002b49] leading-none"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    {stat.value}
+                  </p>
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
 
-      {/* CTA */}
-      <section className="py-20 bg-background">
-        <div className="container text-center">
-          <h2 className="font-serif text-4xl font-semibold mb-4">Ready to start planning?</h2>
-          <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto">
-            Create your account and begin mapping your Great Loop voyage today. Your trip will be waiting whenever you return.
-          </p>
-          {isAuthenticated ? (
-            <Button size="lg" className="gap-2 px-8" onClick={() => navigate("/trips")}>
-              Go to My Trips <ArrowRight className="w-4 h-4" />
-            </Button>
-          ) : (
-            <Button size="lg" className="gap-2 px-8" onClick={() => startLogin()}>
-              Create Free Account <ArrowRight className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
-      </section>
+          {/* ── TACTICAL SUITE ── */}
+          <section className="px-8 lg:px-12 py-12 bg-[#f9f9f9]">
+            <div className="max-w-[1100px] mx-auto">
+              <div className="mb-8">
+                <h2 className="text-headline-md text-[#002b49] mb-2">
+                  Tactical Suite
+                </h2>
+                <p className="text-body-md text-[#42474d]">
+                  Precision-engineered tools to manage every nautical mile of
+                  your expedition.
+                </p>
+              </div>
 
-      {/* Footer */}
-      <footer className="border-t border-border py-8">
-        <div className="container flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Anchor className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground font-serif">Great Loop Planner</span>
-          </div>
-          <p className="text-xs text-muted-foreground">Built for Loopers, by Loopers. Happy cruising. ⚓</p>
-        </div>
-      </footer>
+              {/* Card grid — 3 columns */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Card 1: Interactive Route Map (large, spans 1 col but taller) */}
+                <div className="card-maritime p-5 flex flex-col">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-9 h-9 rounded bg-[#f3f3f4] flex items-center justify-center">
+                      <Map className="w-4.5 h-4.5 text-[#002b49]" />
+                    </div>
+                    <span className="badge-live">Live Sync</span>
+                  </div>
+                  <h3 className="text-headline-sm text-[#002b49] mb-2">
+                    Interactive Route Map
+                  </h3>
+                  <p className="text-[14px] text-[#42474d] leading-relaxed mb-4">
+                    Vector-based routing with real-time AIS overlay and
+                    bathymetric data layers for precision docking.
+                  </p>
+                  {/* Mini map preview */}
+                  <div className="mt-auto rounded overflow-hidden border border-[#e2e2e2] h-28 bg-[#e8f4f8] flex items-center justify-center">
+                    <div className="text-center">
+                      <Compass className="w-8 h-8 text-[#002b49] mx-auto mb-1 opacity-40" />
+                      <span
+                        className="text-[9px] text-[#42474d] uppercase tracking-widest"
+                        style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                      >
+                        Great Loop Route
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card 2: Itinerary Planner */}
+                <div className="card-maritime p-5 flex flex-col">
+                  <div className="w-9 h-9 rounded bg-[#f3f3f4] flex items-center justify-center mb-3">
+                    <BookOpen className="w-4.5 h-4.5 text-[#002b49]" />
+                  </div>
+                  <h3 className="text-headline-sm text-[#002b49] mb-2">
+                    Itinerary Planner
+                  </h3>
+                  <p className="text-[14px] text-[#42474d] leading-relaxed">
+                    Dynamic scheduling that adapts to weather windows and bridge
+                    opening intervals.
+                  </p>
+                </div>
+
+                {/* Card 3: POI Discovery */}
+                <div className="card-maritime p-5 flex flex-col">
+                  <div className="w-9 h-9 rounded bg-[#f3f3f4] flex items-center justify-center mb-3">
+                    <MapPin className="w-4.5 h-4.5 text-[#002b49]" />
+                  </div>
+                  <h3 className="text-headline-sm text-[#002b49] mb-2">
+                    POI Discovery
+                  </h3>
+                  <p className="text-[14px] text-[#42474d] leading-relaxed">
+                    Curated list of premium marinas, deep-water anchorages, and
+                    coastal provisioning.
+                  </p>
+                </div>
+
+                {/* Card 4: Marine Weather */}
+                <div className="card-maritime p-5 flex flex-col">
+                  <div className="w-9 h-9 rounded bg-[#f3f3f4] flex items-center justify-center mb-3">
+                    <Cloud className="w-4.5 h-4.5 text-[#002b49]" />
+                  </div>
+                  <h3 className="text-headline-sm text-[#002b49] mb-2">
+                    Marine Weather
+                  </h3>
+                  <p className="text-[14px] text-[#42474d] leading-relaxed">
+                    NOAA integration with wave height forecasts and atmospheric
+                    pressure tracking.
+                  </p>
+                </div>
+
+                {/* Card 5: Automated Logbook (dark featured card) */}
+                <div className="card-navy p-5 flex flex-col">
+                  <div className="w-9 h-9 rounded bg-white/10 flex items-center justify-center mb-3">
+                    <Zap className="w-4.5 h-4.5 text-[#00e3fd]" />
+                  </div>
+                  <h3
+                    className="text-[18px] font-semibold text-white mb-2 leading-snug"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    Automated Logbook
+                  </h3>
+                  <p className="text-[14px] text-white/70 leading-relaxed mb-5">
+                    Capture engine telemetry, weather conditions, and personal
+                    notes automatically with NMEA 2000 hardware integration.
+                  </p>
+                  <div className="mt-auto">
+                    <button className="px-4 py-2 border border-white/30 text-white text-[10px] font-mono tracking-widest uppercase rounded hover:bg-white/10 transition-colors">
+                      Explore API
+                    </button>
+                  </div>
+                </div>
+
+                {/* Card 6: Looper Community */}
+                <div className="card-maritime p-5 flex flex-col">
+                  <div className="w-9 h-9 rounded bg-[#f3f3f4] flex items-center justify-center mb-3">
+                    <Users className="w-4.5 h-4.5 text-[#002b49]" />
+                  </div>
+                  <h3 className="text-headline-sm text-[#002b49] mb-2">
+                    Looper Community
+                  </h3>
+                  <p className="text-[14px] text-[#42474d] leading-relaxed mb-4">
+                    Connect with fellow Loopers, share waypoints, and get
+                    real-time marina reviews.
+                  </p>
+                  {/* Avatar stack */}
+                  <div className="mt-auto flex items-center gap-2">
+                    <div className="flex -space-x-2">
+                      {["#002b49", "#006875", "#274969", "#42474d", "#00616d"].map(
+                        (color, i) => (
+                          <div
+                            key={i}
+                            className="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-white text-[8px] font-mono"
+                            style={{ backgroundColor: color }}
+                          >
+                            {String.fromCharCode(65 + i)}
+                          </div>
+                        )
+                      )}
+                    </div>
+                    <span
+                      className="text-[10px] text-[#42474d]"
+                      style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                    >
+                      +5k
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ── LIVE TELEMETRY SECTION ── */}
+          <section className="px-8 lg:px-12 py-12 bg-[#f0f4f7] border-t border-b border-[#e2e2e2]">
+            <div className="max-w-[1100px] mx-auto grid lg:grid-cols-2 gap-10 items-center">
+              {/* Left: copy + controls */}
+              <div>
+                <p
+                  className="text-[10px] text-[#42474d] uppercase tracking-widest mb-3 flex items-center gap-2"
+                  style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                >
+                  <span className="w-6 h-px bg-[#42474d] inline-block" />
+                  Live Telemetry
+                </p>
+                <h2 className="text-headline-md text-[#002b49] mb-4">
+                  Chart Your Success
+                </h2>
+                <p className="text-body-md text-[#42474d] mb-8">
+                  Our engine pulls live depth readings, bridge clearances, and
+                  current velocities to provide the safest possible passage
+                  planning.
+                </p>
+
+                {/* Instrument controls */}
+                <div className="space-y-4">
+                  {[
+                    { label: "Bridge Clearance", value: "35' 2\"", pct: 72 },
+                    { label: "Draft Margin", value: "4' 6\"", pct: 45 },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="bg-white border border-[#e2e2e2] rounded px-4 py-3"
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <span
+                          className="text-[10px] text-[#42474d] uppercase tracking-widest"
+                          style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                        >
+                          {item.label}
+                        </span>
+                        <span
+                          className="text-[12px] font-medium text-[#002b49]"
+                          style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                        >
+                          {item.value}
+                        </span>
+                      </div>
+                      <div className="h-1.5 bg-[#e2e2e2] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[#00e3fd] rounded-full"
+                          style={{ width: `${item.pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right: map preview with waypoint overlay */}
+              <div className="relative">
+                <div className="rounded-lg overflow-hidden border border-[#e2e2e2] shadow-[0_4px_20px_rgba(0,43,73,0.08)]">
+                  <img
+                    src={MAP_IMG}
+                    alt="Great Loop route map"
+                    className="w-full h-64 object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='400' viewBox='0 0 900 400'%3E%3Crect fill='%23c8dce8' width='900' height='400'/%3E%3Ctext fill='%23002b49' font-family='serif' font-size='20' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EInteractive Route Map%3C/text%3E%3C/svg%3E";
+                    }}
+                  />
+                  {/* Map header bar */}
+                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                    <div className="glass-card rounded px-3 py-1.5 text-[9px] font-mono text-[#002b49] tracking-widest uppercase">
+                      Great Loop Planner · Sea Mist Edition
+                    </div>
+                    <div className="glass-card rounded px-2 py-1.5 text-[9px] font-mono text-[#42474d]">
+                      ↑
+                    </div>
+                  </div>
+                </div>
+                {/* Waypoint overlay card */}
+                <div className="absolute bottom-4 right-4 bg-[#002b49] text-white rounded-lg px-4 py-3 shadow-lg max-w-[180px]">
+                  <p
+                    className="text-[8px] text-white/60 uppercase tracking-widest mb-1"
+                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                  >
+                    Next Waypoint
+                  </p>
+                  <p
+                    className="text-[13px] font-semibold text-white leading-snug mb-1"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    Dismal Swamp Canal
+                  </p>
+                  <p
+                    className="text-[9px] text-[#00e3fd]"
+                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                  >
+                    Arrival: 14:00 EST
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ── CTA SECTION ── */}
+          <section className="px-8 lg:px-12 py-20 bg-white text-center">
+            <p
+              className="text-[10px] text-[#42474d] uppercase tracking-widest mb-5"
+              style={{ fontFamily: "'JetBrains Mono', monospace" }}
+            >
+              Ready to Cast Off?
+            </p>
+            <h2
+              className="text-[clamp(32px,4vw,52px)] font-bold text-[#002b49] leading-tight mb-5 max-w-2xl mx-auto"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              Your Great Loop adventure begins with precision.
+            </h2>
+            <p className="text-body-md text-[#42474d] mb-10 max-w-lg mx-auto">
+              Join over 12,000 Loopers who trust Great Loop Planner for their
+              voyage of a lifetime. Get started with a free 30-day nautical
+              trial.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              {isAuthenticated ? (
+                <Link href="/trips">
+                  <button className="btn-primary px-8 py-3 text-[11px]">
+                    Create Expedition
+                  </button>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => startLogin()}
+                  className="btn-primary px-8 py-3 text-[11px]"
+                >
+                  Create Expedition
+                </button>
+              )}
+              <button className="btn-ghost px-8 py-3 text-[11px]">
+                View Pricing
+              </button>
+            </div>
+          </section>
+
+          {/* ── FOOTER ── */}
+          <footer className="px-8 lg:px-12 py-8 bg-white border-t border-[#e2e2e2]">
+            <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Anchor className="w-3.5 h-3.5 text-[#002b49]" />
+                  <span
+                    className="text-[11px] font-semibold text-[#002b49]"
+                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                  >
+                    Great Loop Planner
+                  </span>
+                </div>
+                <p
+                  className="text-[10px] text-[#42474d]"
+                  style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                >
+                  © 2026 Great Loop Planner. Maritime Precision Engineering.
+                </p>
+              </div>
+              <nav className="flex items-center gap-6">
+                {["Safety Protocol", "Charts", "Support", "Terms"].map(
+                  (link) => (
+                    <a
+                      key={link}
+                      href="#"
+                      className="text-[10px] text-[#42474d] hover:text-[#002b49] transition-colors"
+                      style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                    >
+                      {link}
+                    </a>
+                  )
+                )}
+              </nav>
+              <div className="flex items-center gap-3">
+                <button className="p-1.5 text-[#42474d] hover:text-[#002b49] transition-colors">
+                  <Download className="w-4 h-4" />
+                </button>
+                <button className="p-1.5 text-[#42474d] hover:text-[#002b49] transition-colors">
+                  <Settings className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </footer>
+        </main>
+      </div>
     </div>
   );
 }
