@@ -75,13 +75,12 @@
 - [x] Vitest test suite (13 tests passing)
 
 ## Future Enhancements
-- [ ] Drag-to-reorder waypoints in sidebar
-- [ ] Vessel speed used for actual travel time estimates (currently defaults to 8 kts)
-- [ ] Trip date range picker
-- [ ] Export itinerary as PDF
-- [ ] Weather integration at waypoints
-- [ ] Fuel range overlay on map
-- [ ] Bridge clearance warnings based on air draft
-- [ ] Mobile app (iOS/Android via Expo)
-- [ ] Shared trip view (read-only link)
-- [ ] Community POI contributions
+- [ ] Drag-to-reorder waypoints in sidebar (v2)
+- [ ] Trip date range picker (v2)
+- [ ] Export itinerary as PDF (v2)
+- [ ] Weather integration at waypoints (v2)
+- [ ] Fuel range overlay on map (v2)
+- [ ] Bridge clearance warnings based on air draft (v2)
+- [ ] Mobile app (iOS/Android via Expo) (v2)
+- [ ] Shared trip view (read-only link) (v2)
+- [ ] Community POI contributions (v2)

@@ -81,8 +81,8 @@ export default function TripsPage() {
                           <p className="text-muted-foreground text-sm mt-0.5 line-clamp-2">{trip.description}</p>
                         )}
                       </div>
-                      <Badge className={`ml-2 shrink-0 text-xs ${TRIP_STATUS_COLORS[trip.status]}`}>
-                        {TRIP_STATUS_LABELS[trip.status]}
+                      <Badge className={`ml-2 shrink-0 text-xs ${TRIP_STATUS_COLORS[trip.status as TripStatus] ?? ""}`}>
+                        {TRIP_STATUS_LABELS[trip.status as TripStatus] ?? trip.status}
                       </Badge>
                     </div>
 
@@ -123,3 +123,4 @@ export default function TripsPage() {
     </div>
   );
 }
+import type { TripStatus } from "@shared/types";

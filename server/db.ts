@@ -1,5 +1,6 @@
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { and, asc, desc, eq } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import {
   InsertUser, JournalEntry, Poi, Trip, VesselProfile, Waypoint,
   journalEntries, pois, trips, users, vesselProfiles, waypoints,
@@ -13,7 +14,8 @@ let _db: ReturnType<typeof drizzle> | null = null;
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      const client = postgres(process.env.DATABASE_URL, { ssl: "require", max: 5 });
+      _db = drizzle(client);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -28,24 +30,27 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   const db = await getDb();
   if (!db) { console.warn("[Database] Cannot upsert user: database not available"); return; }
   try {
-    const values: InsertUser = { openId: user.openId };
-    const updateSet: Record<string, unknown> = {};
-    const textFields = ["name", "email", "loginMethod"] as const;
-    type TextField = (typeof textFields)[number];
-    const assignNullable = (field: TextField) => {
-      const value = user[field];
-      if (value === undefined) return;
-      const normalized = value ?? null;
-      values[field] = normalized;
-      updateSet[field] = normalized;
-    };
-    textFields.forEach(assignNullable);
-    if (user.lastSignedIn !== undefined) { values.lastSignedIn = user.lastSignedIn; updateSet.lastSignedIn = user.lastSignedIn; }
-    if (user.role !== undefined) { values.role = user.role; updateSet.role = user.role; }
-    else if (user.openId === ENV.ownerOpenId) { values.role = "admin"; updateSet.role = "admin"; }
-    if (!values.lastSignedIn) values.lastSignedIn = new Date();
-    if (Object.keys(updateSet).length === 0) updateSet.lastSignedIn = new Date();
-    await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
+    const now = new Date();
+    const role = user.role ?? (user.openId === ENV.ownerOpenId ? "admin" : "user");
+    await db.insert(users)
+      .values({
+        openId: user.openId,
+        name: user.name ?? null,
+        email: user.email ?? null,
+        loginMethod: user.loginMethod ?? null,
+        role,
+        lastSignedIn: user.lastSignedIn ?? now,
+      })
+      .onConflictDoUpdate({
+        target: users.openId,
+        set: {
+          name: user.name ?? null,
+          email: user.email ?? null,
+          loginMethod: user.loginMethod ?? null,
+          lastSignedIn: user.lastSignedIn ?? now,
+          updatedAt: now,
+        },
+      });
   } catch (error) { console.error("[Database] Failed to upsert user:", error); throw error; }
 }
 
@@ -73,14 +78,14 @@ export async function getTripById(id: number, userId: number): Promise<Trip | un
 export async function createTrip(data: InsertTrip): Promise<number> {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
-  const result = await db.insert(trips).values(data);
-  return (result[0] as any).insertId;
+  const result = await db.insert(trips).values(data).returning({ id: trips.id });
+  return result[0].id;
 }
 
 export async function updateTrip(id: number, userId: number, data: Partial<InsertTrip>): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
-  await db.update(trips).set(data).where(and(eq(trips.id, id), eq(trips.userId, userId)));
+  await db.update(trips).set({ ...data, updatedAt: new Date() }).where(and(eq(trips.id, id), eq(trips.userId, userId)));
 }
 
 export async function deleteTrip(id: number, userId: number): Promise<void> {
@@ -107,14 +112,14 @@ export async function addWaypoint(data: InsertWaypoint): Promise<number> {
     .from(waypoints).where(eq(waypoints.tripId, data.tripId))
     .orderBy(desc(waypoints.sortOrder)).limit(1);
   const maxOrder = existing[0]?.sortOrder ?? -1;
-  const result = await db.insert(waypoints).values({ ...data, sortOrder: maxOrder + 1 });
-  return (result[0] as any).insertId;
+  const result = await db.insert(waypoints).values({ ...data, sortOrder: maxOrder + 1 }).returning({ id: waypoints.id });
+  return result[0].id;
 }
 
 export async function updateWaypoint(id: number, userId: number, data: Partial<InsertWaypoint>): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
-  await db.update(waypoints).set(data).where(and(eq(waypoints.id, id), eq(waypoints.userId, userId)));
+  await db.update(waypoints).set({ ...data, updatedAt: new Date() }).where(and(eq(waypoints.id, id), eq(waypoints.userId, userId)));
 }
 
 export async function removeWaypoint(id: number, userId: number): Promise<void> {
@@ -128,7 +133,7 @@ export async function reorderWaypoints(tripId: number, userId: number, orderedId
   if (!db) throw new Error("DB not available");
   for (let i = 0; i < orderedIds.length; i++) {
     await db.update(waypoints).set({ sortOrder: i })
-      .where(and(eq(waypoints.id, orderedIds[i]), eq(waypoints.userId, userId), eq(waypoints.tripId, tripId)));
+      .where(and(eq(waypoints.id, orderedIds[i]!), eq(waypoints.userId, userId), eq(waypoints.tripId, tripId)));
   }
 }
 
@@ -137,7 +142,7 @@ export async function getPois(category?: string): Promise<Poi[]> {
   const db = await getDb();
   if (!db) return [];
   if (category && category !== "all") {
-    return db.select().from(pois).where(eq(pois.category, category as any)).limit(200);
+    return db.select().from(pois).where(eq(pois.category, category)).limit(200);
   }
   return db.select().from(pois).limit(200);
 }
@@ -180,13 +185,13 @@ export async function seedPoisIfEmpty(): Promise<void> {
     // Museums
     { name: "Mystic Seaport Museum", category: "museum", lat: 41.3618, lng: -71.9637, address: "75 Greenmanville Ave, Mystic, CT", description: "The nation's leading maritime museum. Historic ships, a recreated 19th-century village, and world-class collections.", phone: "860-572-0711", website: "https://www.mysticseaport.org", rating: 4.8, tags: ["maritime", "historic-ships", "world-class"] },
     { name: "National Naval Aviation Museum", category: "museum", lat: 30.3520, lng: -87.3098, address: "1750 Radford Blvd, Pensacola, FL", description: "One of the world's largest naval aviation museums with over 150 aircraft. Free admission.", phone: "850-452-3604", website: "https://www.navalaviationmuseum.org", rating: 4.9, tags: ["free", "aviation", "military"] },
-    { name: "Erie Maritime Museum", category: "museum", lat: 42.1307, lng: -80.0845, address: "150 E Front St, Erie, PA", description: "Home of the US Brig Niagara, flagship of the Battle of Lake Erie. Excellent Great Lakes history.", phone: "814-452-2744", rating: 4.6, tags: ["lake-erie", "historic-ships", "battle-of-lake-erie"] },
+    { name: "Erie Maritime Museum", category: "museum", lat: 42.1307, lng: -80.0845, address: "150 E Front St, Erie, PA", description: "Home of the US Brig Niagara, flagship of the Battle of Lake Erie. Excellent Great Lakes history.", phone: "814-452-2744", rating: 4.6, tags: ["lake-erie", "historic-ships"] },
     { name: "The Mariners' Museum", category: "museum", lat: 37.0469, lng: -76.4900, address: "100 Museum Dr, Newport News, VA", description: "World-class maritime museum housing the recovered USS Monitor turret and extensive collections.", phone: "757-596-2222", website: "https://www.marinersmuseum.org", rating: 4.7, tags: ["uss-monitor", "chesapeake", "world-class"] },
     // Attractions
-    { name: "Mackinac Island State Park", category: "attraction", lat: 45.8617, lng: -84.6189, address: "Mackinac Island, MI", description: "80% of the island is state park. No cars allowed — explore by bicycle or horse-drawn carriage. Stunning views of the Straits.", rating: 4.9, tags: ["no-cars", "cycling", "great-lakes", "iconic"] },
-    { name: "Soo Locks", category: "attraction", lat: 46.5026, lng: -84.3469, address: "Sault Ste. Marie, MI", description: "Engineering marvel connecting Lake Superior to Lake Huron. Watch massive freighters lock through from the observation deck.", rating: 4.7, tags: ["locks", "engineering", "great-lakes"] },
-    { name: "Cape Hatteras Lighthouse", category: "attraction", lat: 35.2505, lng: -75.5277, address: "Cape Hatteras, NC", description: "The tallest brick lighthouse in the US at 198 feet. Iconic black-and-white spiral pattern. Climb to the top for panoramic views.", rating: 4.8, tags: ["lighthouse", "iconic", "outer-banks"] },
-    { name: "Everglades National Park", category: "attraction", lat: 25.2866, lng: -80.8987, address: "40001 State Road 9336, Homestead, FL", description: "The largest tropical wilderness in the US. Incredible wildlife including manatees, alligators, and rare birds.", rating: 4.8, tags: ["wildlife", "tropical", "national-park"] },
+    { name: "Mackinac Island State Park", category: "attraction", lat: 45.8617, lng: -84.6189, address: "Mackinac Island, MI", description: "80% of the island is state park. No cars allowed — explore by bicycle or horse-drawn carriage.", rating: 4.9, tags: ["no-cars", "cycling", "great-lakes", "iconic"] },
+    { name: "Soo Locks", category: "attraction", lat: 46.5026, lng: -84.3469, address: "Sault Ste. Marie, MI", description: "Engineering marvel connecting Lake Superior to Lake Huron. Watch massive freighters lock through.", rating: 4.7, tags: ["locks", "engineering", "great-lakes"] },
+    { name: "Cape Hatteras Lighthouse", category: "attraction", lat: 35.2505, lng: -75.5277, address: "Cape Hatteras, NC", description: "The tallest brick lighthouse in the US at 198 feet. Iconic black-and-white spiral pattern.", rating: 4.8, tags: ["lighthouse", "iconic", "outer-banks"] },
+    { name: "Everglades National Park", category: "attraction", lat: 25.2866, lng: -80.8987, address: "40001 State Road 9336, Homestead, FL", description: "The largest tropical wilderness in the US. Incredible wildlife including manatees and alligators.", rating: 4.8, tags: ["wildlife", "tropical", "national-park"] },
     { name: "French Quarter, New Orleans", category: "attraction", lat: 29.9584, lng: -90.0644, address: "French Quarter, New Orleans, LA", description: "The historic heart of New Orleans. Jazz music, Creole architecture, world-class food, and vibrant nightlife.", rating: 4.8, tags: ["historic", "jazz", "food", "nightlife"] },
   ];
   await db.insert(pois).values(seed);
@@ -212,14 +217,14 @@ export async function getJournalEntriesByWaypoint(waypointId: number, userId: nu
 export async function createJournalEntry(data: InsertJournalEntry): Promise<number> {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
-  const result = await db.insert(journalEntries).values(data);
-  return (result[0] as any).insertId;
+  const result = await db.insert(journalEntries).values(data).returning({ id: journalEntries.id });
+  return result[0].id;
 }
 
 export async function updateJournalEntry(id: number, userId: number, data: Partial<InsertJournalEntry>): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
-  await db.update(journalEntries).set(data).where(and(eq(journalEntries.id, id), eq(journalEntries.userId, userId)));
+  await db.update(journalEntries).set({ ...data, updatedAt: new Date() }).where(and(eq(journalEntries.id, id), eq(journalEntries.userId, userId)));
 }
 
 export async function deleteJournalEntry(id: number, userId: number): Promise<void> {
@@ -239,7 +244,11 @@ export async function getVesselProfile(userId: number): Promise<VesselProfile | 
 export async function upsertVesselProfile(userId: number, data: Partial<InsertVesselProfile>): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
+  const now = new Date();
   await db.insert(vesselProfiles)
-    .values({ ...data, userId })
-    .onDuplicateKeyUpdate({ set: data });
+    .values({ ...data, userId, updatedAt: now })
+    .onConflictDoUpdate({
+      target: vesselProfiles.userId,
+      set: { ...data, updatedAt: now },
+    });
 }
