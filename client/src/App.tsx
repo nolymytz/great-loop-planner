@@ -5,9 +5,11 @@ import { Route, Switch, Redirect } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { useAuth } from "./contexts/AuthContext";
-import Home from "./pages/Home";
+import ComingSoon from "./pages/ComingSoon";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/AuthPage";
+
+const Home = lazy(() => import("./pages/Home"));
 
 const PlannerPage      = lazy(() => import("./pages/PlannerPage"));
 const TripsPage        = lazy(() => import("./pages/TripsPage"));
@@ -31,24 +33,30 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 function Router() {
   const { isAuthenticated } = useAuth();
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#f9f9f9]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#002b49]" />}>
       <Switch>
-        <Route path="/"                  component={Home} />
+        {/* Coming soon — public landing page */}
+        <Route path="/"                  component={ComingSoon} />
+        {/* Full app under /app prefix */}
+        <Route path="/app"               component={Home} />
+        <Route path="/app/auth">
+          {isAuthenticated ? <Redirect to="/trips" /> : <AuthPage />}
+        </Route>
         <Route path="/auth">
           {isAuthenticated ? <Redirect to="/trips" /> : <AuthPage />}
         </Route>
-        <Route path="/trips">            <ProtectedRoute component={TripsPage} /></Route>
-        <Route path="/planner/:tripId">  <ProtectedRoute component={PlannerPage} /></Route>
-        <Route path="/planner">          <ProtectedRoute component={PlannerPage} /></Route>
-        <Route path="/fuel">             <ProtectedRoute component={FuelCalcPage} /></Route>
-        <Route path="/maintenance">      <ProtectedRoute component={MaintenancePage} /></Route>
-        <Route path="/logbook">          <ProtectedRoute component={LogbookPage} /></Route>
-        <Route path="/marinas">          <ProtectedRoute component={MarinasPage} /></Route>
-        <Route path="/weather">          <ProtectedRoute component={WeatherPage} /></Route>
-        <Route path="/community">        <ProtectedRoute component={CommunityPage} /></Route>
-        <Route path="/dream-boat">       <ProtectedRoute component={DreamBoatPage} /></Route>
-        <Route path="/wishlist">         <ProtectedRoute component={WishlistPage} /></Route>
-        <Route path="/settings">         <ProtectedRoute component={SettingsPage} /></Route>
+        <Route path="/trips">             <ProtectedRoute component={TripsPage} /></Route>
+        <Route path="/planner/:tripId">   <ProtectedRoute component={PlannerPage} /></Route>
+        <Route path="/planner">           <ProtectedRoute component={PlannerPage} /></Route>
+        <Route path="/fuel">              <ProtectedRoute component={FuelCalcPage} /></Route>
+        <Route path="/maintenance">       <ProtectedRoute component={MaintenancePage} /></Route>
+        <Route path="/logbook">           <ProtectedRoute component={LogbookPage} /></Route>
+        <Route path="/marinas">           <ProtectedRoute component={MarinasPage} /></Route>
+        <Route path="/weather">           <ProtectedRoute component={WeatherPage} /></Route>
+        <Route path="/community">         <ProtectedRoute component={CommunityPage} /></Route>
+        <Route path="/dream-boat">        <ProtectedRoute component={DreamBoatPage} /></Route>
+        <Route path="/wishlist">          <ProtectedRoute component={WishlistPage} /></Route>
+        <Route path="/settings">          <ProtectedRoute component={SettingsPage} /></Route>
         <Route                           component={NotFound} />
       </Switch>
     </Suspense>

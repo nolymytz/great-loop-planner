@@ -110,3 +110,4 @@
 - [ ] "Places I'd Like to Visit" wishlist board — pre-trip bucket list of destinations, separate from the active itinerary (v2)
 - [ ] "Things I'd Like to Do" activity wishlist — experiences, events, and activities to consider along the route (v2)
 - [ ] "Boat Must-Haves" gear and equipment checklist — provisioning, safety gear, and upgrades to complete before departure (v2)
+- [ ] DockTails — social feature for loopers in the same area to connect and organize dock cocktail hours, card games, and casual gatherings; includes location-based discovery of nearby loopers, event creation, RSVP, and in-app messaging (v2)
