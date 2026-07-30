@@ -111,3 +111,4 @@
 - [ ] "Things I'd Like to Do" activity wishlist — experiences, events, and activities to consider along the route (v2)
 - [ ] "Boat Must-Haves" gear and equipment checklist — provisioning, safety gear, and upgrades to complete before departure (v2)
 - [ ] DockTails — social feature for loopers in the same area to connect and organize dock cocktail hours, card games, and casual gatherings; includes location-based discovery of nearby loopers, event creation, RSVP, and in-app messaging (v2)
+- [ ] YouTube Location Tags — tag marinas, anchorages, and attractions with linked YouTube videos from loopers and cruising YouTubers who visited; searchable by location with embedded video previews in the POI detail panel, and the ability for users to submit video links (v2)

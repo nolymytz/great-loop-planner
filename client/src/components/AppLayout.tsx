@@ -21,7 +21,7 @@ const navItems = [
   { href: '/community',   label: 'Community',      icon: Users },
 ];
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default function AppLayout({ children, fullHeight = false }: { children: React.ReactNode; fullHeight?: boolean }) {
   const [location] = useLocation();
   const { user, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -34,7 +34,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Captain';
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] flex">
+    <div className={`${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'} bg-[#f9f9f9] flex`}>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
@@ -101,7 +101,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+      <div className={`flex-1 lg:ml-64 flex flex-col ${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
         {/* Mobile top bar */}
         <div className="lg:hidden flex items-center gap-3 px-4 py-3 bg-[#002b49] border-b border-white/10">
           <button onClick={() => setSidebarOpen(true)} className="text-white">
@@ -109,11 +109,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </button>
           <span className="font-serif text-white font-semibold">Great Loop Planner</span>
         </div>
-        <main className="flex-1">
+        <main className={`flex-1 ${fullHeight ? 'overflow-hidden h-full' : ''}`}>
           {children}
         </main>
       </div>
     </div>
   );
 }
-

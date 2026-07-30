@@ -2,6 +2,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { useParams, useLocation, Link } from "wouter";
 import { MapView } from "@/components/Map";
 import { AppNav } from "@/components/AppNav";
+import AppLayout from "@/components/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase, type Trip, type Waypoint, type Poi, type VesselProfile, type JournalEntry } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -260,13 +261,12 @@ export default function PlannerPage() {
     return sum + computeDistance({ lat: waypoints[i-1].lat, lng: waypoints[i-1].lng }, { lat: wp.lat, lng: wp.lng });
   }, 0);
 
-  if (loading) return <div className="min-h-screen bg-background" />;
+  if (loading) return <AppLayout fullHeight><div className="h-full bg-background" /></AppLayout>;
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <AppNav />
-        <div className="flex-1 flex items-center justify-center pt-16">
+      <AppLayout>
+        <div className="flex-1 flex items-center justify-center py-24">
           <div className="text-center max-w-sm px-4">
             <Anchor className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <h2 className="font-serif text-2xl mb-2">Sign in to access the Planner</h2>
@@ -274,15 +274,14 @@ export default function PlannerPage() {
             <Link href="/auth"><Button>Sign In to Continue</Button></Link>
           </div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   if (!tripId) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <AppNav />
-        <div className="flex-1 flex items-center justify-center pt-16">
+      <AppLayout>
+        <div className="flex-1 flex items-center justify-center py-24">
           <div className="text-center max-w-sm px-4">
             <Anchor className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <h2 className="font-serif text-2xl mb-2">Select a trip to plan</h2>
@@ -290,14 +289,13 @@ export default function PlannerPage() {
             <Button onClick={() => navigate("/trips")}>Go to My Trips</Button>
           </div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      <AppNav />
-      <div className="flex flex-1 overflow-hidden pt-14">
+    <AppLayout fullHeight>
+      <div className="h-full flex overflow-hidden">
         {/* Sidebar */}
         <aside className={cn(
           "relative flex flex-col bg-white border-r border-border shadow-md transition-all duration-300 ease-in-out z-10",
@@ -504,7 +502,7 @@ export default function PlannerPage() {
           <TripJournalPanel tripId={tripId} onClose={() => setJournalOpen(false)} />
         )}
       </div>
-    </div>
+    </AppLayout>
   );
 }
 
